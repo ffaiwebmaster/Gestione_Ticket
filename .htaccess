@@ -1,0 +1,13 @@
+# Blocca accesso diretto al database, ai log e ai file sensibili
+<FilesMatch "\.(sqlite|log|gitkeep)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Abilita PHP se necessario su hosting condiviso
+AddHandler application/x-httpd-php .php

@@ -1,0 +1,25 @@
+# Database — contiene dati reali, non committare mai
+*.sqlite
+sqlite_backup_data/
+
+# Log con IP e operazioni reali
+*.log
+*.log.old
+
+# Configurazione locale con credenziali
+config.php
+.env
+
+# Allegati caricati dagli utenti
+allegati/*
+!allegati/.gitkeep
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
