@@ -239,8 +239,8 @@ function totp_qr_url(): string {
 // Il 2FA esterno verrà riabilitato su richiesta
 $is_internal  = is_internal_ip();
 $is_auth      = (defined('INTERNAL_ONLY') && INTERNAL_ONLY && $is_internal)
-    || (isset($_SESSION['ales_auth']) && $_SESSION['ales_auth'] === true
-        && isset($_SESSION['ales_ts'])  && (time() - $_SESSION['ales_ts']) < SESSION_TTL);
+    || (isset($_SESSION['gest_auth']) && $_SESSION['gest_auth'] === true
+        && isset($_SESSION['gest_ts'])  && (time() - $_SESSION['gest_ts']) < SESSION_TTL);
 
 // ── Rate limiting: blocco IP dopo 2 tentativi falliti ─────────
 function rl_db(): PDO {
@@ -290,8 +290,8 @@ if (!$is_auth && isset($_POST['_login'])) {
         $errLogin = 'Accesso bloccato per troppi tentativi falliti. Contatta l\'amministratore IT.';
     } elseif ($pwd === AUTH_PASSWORD && totp_verify(TOTP_SECRET, $otp)) {
         rl_reset($ip);
-        $_SESSION['ales_auth'] = true;
-        $_SESSION['ales_ts']   = time();
+        $_SESSION['gest_auth'] = true;
+        $_SESSION['gest_ts']   = time();
         audit_log('LOGIN', 'esterno');
         header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
         exit;
@@ -320,7 +320,7 @@ if (isset($_GET['logout'])) {
 
 // Cambio utente
 if (isset($_GET['cambia_utente'])) {
-    unset($_SESSION['ales_user'], $_SESSION['ales_user_nome'], $_SESSION['ales_readonly']);
+    unset($_SESSION['gest_user'], $_SESSION['gest_user_nome'], $_SESSION['gest_readonly']);
     header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
     exit;
 }
@@ -336,22 +336,22 @@ if (isset($_POST['_scegli_utente'])) {
             header('Location: ?pin_err=1&sigla=' . urlencode($sigla));
             exit;
         }
-        $_SESSION['ales_user']      = $sigla;
-        $_SESSION['ales_user_nome'] = $nome;
-        $_SESSION['ales_readonly']  = false;
+        $_SESSION['gest_user']      = $sigla;
+        $_SESSION['gest_user_nome'] = $nome;
+        $_SESSION['gest_readonly']  = false;
     } elseif ($sigla === 'OSPITE' && $nome) {
         // Utente ospite: sola lettura, nessun PIN
-        $_SESSION['ales_user']      = 'OSPITE';
-        $_SESSION['ales_user_nome'] = $nome;
-        $_SESSION['ales_readonly']  = true;
+        $_SESSION['gest_user']      = 'OSPITE';
+        $_SESSION['gest_user_nome'] = $nome;
+        $_SESSION['gest_readonly']  = true;
     }
     header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
     exit;
 }
 
-$utente_sigla = $_SESSION['ales_user']      ?? '';
-$utente_nome  = $_SESSION['ales_user_nome'] ?? '';
-$is_readonly  = $_SESSION['ales_readonly']   ?? false;
+$utente_sigla = $_SESSION['gest_user']      ?? '';
+$utente_nome  = $_SESSION['gest_user_nome'] ?? '';
+$is_readonly  = $_SESSION['gest_readonly']   ?? false;
 
 // Se non autenticato → mostra pagina login
 // ── Invio QR via email ───────────────────────────────────────────
@@ -399,7 +399,7 @@ if (isset($_POST['_richiedi_qr'])) {
            . $qrUrl . "\r\n\r\n"
            . "Oppure inserisci manualmente il codice segreto:\r\n"
            . $secret . "\r\n\r\n"
-           . "Accedi su: https://alesit.free.nf\r\n\r\n"
+           . "Accedi all'app dal tuo browser.\r\n\r\n"
            . "--- Messaggio automatico Gestione Ticket ---";
 
     $sent = smtp_send($email, 'Gestione Ticket - Configurazione Google Authenticator', $corpo);
@@ -920,7 +920,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['_action'])) {
             $_POST['allegati'] ?? '[]'
         ]);
         $newId = $pdo->lastInsertId();
-        $utenteLog = $_SESSION['ales_user'] ?? '?';
+        $utenteLog = $_SESSION['gest_user'] ?? '?';
         audit_db('INSERISCI', $utenteLog, (int)$newId, $tipo);
         audit_log('INSERISCI', $utenteLog, "#$newId $tipo");
         // Notifica push: nuova lavorazione
@@ -941,8 +941,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['_action'])) {
         $pdo->prepare("UPDATE lavorazioni SET stato='chiuso',
             data_chiusura=datetime('now','localtime') WHERE id=? AND stato!='chiuso'")
             ->execute([$idChiudi]);
-        audit_db('CHIUDI', $_SESSION['ales_user']??'?', $idChiudi);
-        audit_log('CHIUDI', $_SESSION['ales_user']??'?', "#$idChiudi");
+        audit_db('CHIUDI', $_SESSION['gest_user']??'?', $idChiudi);
+        audit_log('CHIUDI', $_SESSION['gest_user']??'?', "#$idChiudi");
         echo json_encode(['ok'=>true]);
         exit;
     }
@@ -959,8 +959,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['_action'])) {
         header('Content-Type: application/json; charset=utf-8');
         $idDel = (int)$_POST['id'];
         $pdo->prepare("DELETE FROM lavorazioni WHERE id=?")->execute([$idDel]);
-        audit_db('ELIMINA', $_SESSION['ales_user']??'?', $idDel);
-        audit_log('ELIMINA', $_SESSION['ales_user']??'?', "#$idDel");
+        audit_db('ELIMINA', $_SESSION['gest_user']??'?', $idDel);
+        audit_log('ELIMINA', $_SESSION['gest_user']??'?', "#$idDel");
         echo json_encode(['ok'=>true]);
         exit;
     }
@@ -992,7 +992,7 @@ if ($act === 'modifica_assegnato') {
     if (!$id || empty($ass)) { echo json_encode(['ok'=>false,'err'=>'Dati mancanti']); exit; }
     $pdo->prepare("UPDATE lavorazioni SET assegnato_a=? WHERE id=?")
         ->execute([$ass, $id]);
-    audit_db('MODIFICA_ASSEGNATO', $_SESSION['ales_user']??'?', $id, $ass);
+    audit_db('MODIFICA_ASSEGNATO', $_SESSION['gest_user']??'?', $id, $ass);
     // Notifica push: riassegnazione ticket
     $rowAss = $pdo->prepare("SELECT descrizione, tipo FROM lavorazioni WHERE id=?");
     $rowAss->execute([$id]);
@@ -1318,7 +1318,7 @@ if ($act === 'modifica_assegnato') {
         $mese = $_POST['mese'] ?? date('Y-m');
         if (!preg_match('/^\d{4}-\d{2}$/', $mese)) { exit; }
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="ales_report_'.$mese.'.csv"');
+        header('Content-Disposition: attachment; filename="report_'.$mese.'.csv"');
         $rows = $pdo->prepare("SELECT id,tipo,dettaglio,data_richiesta,richiedente,
             assegnato_a,descrizione,ticket_aperto,numero_ticket,priorita,
             stato,data_chiusura,note,created_at
@@ -1345,7 +1345,7 @@ if ($act === 'modifica_assegnato') {
         fputcsv($out, ['Totale','Chiuse','Urgenti','Con Ticket'], ';');
         fputcsv($out, [$s['tot'],$s['chiuse'],$s['urgenti'],$s['con_ticket']], ';');
         fclose($out);
-        audit_log('REPORT_MENSILE', $_SESSION['ales_user']??'?', "Mese $mese");
+        audit_log('REPORT_MENSILE', $_SESSION['gest_user']??'?', "Mese $mese");
         exit;
     }
 
