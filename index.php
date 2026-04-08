@@ -140,43 +140,6 @@ function audit_db(string $azione, string $utente, int $entitaId = 0, string $det
     } catch(Exception $e) { /* audit non blocca mai l'operazione */ }
 }
 
-// ── NOTIFICHE PUSH (OneSignal) ────────────────────────────────
-define('ONESIGNAL_APP_ID',  'd94f94d6-95ff-4862-90f2-d73817a09130');
-define('ONESIGNAL_API_KEY', 'os_v2_app_3fhzjvuv75egfehs244bpiergbbhzxkhp4def2esujnq6gnosws4nyxvydtbptvfhqedmi5ahla4g6itgoxyf3la7jwmhsqe3kake5q');
-
-/**
- * Invia una notifica push a tutti i dispositivi iscritti via OneSignal.
- * Chiamata in background (non blocca la risposta JSON).
- */
-function invia_notifica(string $titolo, string $messaggio, ?string $url = null): void {
-    if (!function_exists('curl_init')) return;
-    $payload = array_filter([
-        'app_id'            => ONESIGNAL_APP_ID,
-        'headings'          => ['en' => $titolo, 'it' => $titolo],
-        'contents'          => ['en' => $messaggio, 'it' => $messaggio],
-        'included_segments' => ['All'],
-        'url'               => $url,
-    ], fn($v) => $v !== null);
-    // Chiude la connessione HTTP prima di chiamare OneSignal
-    // così il client non aspetta il timeout della chiamata esterna
-    if (function_exists('fastcgi_finish_request')) {
-        fastcgi_finish_request();
-    }
-    $ch = curl_init('https://onesignal.com/api/v1/notifications');
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode($payload),
-        CURLOPT_HTTPHEADER     => [
-            'Content-Type: application/json',
-            'Authorization: Basic ' . ONESIGNAL_API_KEY,
-        ],
-        CURLOPT_TIMEOUT        => 10,
-    ]);
-    curl_exec($ch);
-    curl_close($ch);
-}
-
 // ── Rilevamento IP interno ─────────────────────────────────────
 function is_internal_ip(): bool {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
@@ -2191,45 +2154,5 @@ async function sbloccaIp(ip) {
 
 </script>
 <script src="app.js"></script>
-
-<!-- ═══ PWA + ONESIGNAL ════════════════════════════════════════ -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-// Registrazione Service Worker PWA (separato da OneSignal)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .then(() => console.log('PWA SW registrato'))
-        .catch(err => console.warn('PWA SW fallito:', err));
-}
-
-// Inizializzazione OneSignal
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-        appId: "d94f94d6-95ff-4862-90f2-d73817a09130",
-        serviceWorkerPath: "OneSignalSDKWorker.js",
-        notifyButton: {
-            enable: true,          // Mostra il campanellino in basso a destra
-            size: 'medium',
-            position: 'bottom-right',
-            offset: { bottom: '20px', right: '20px' },
-            text: {
-                'tip.state.unsubscribed':  'Attiva notifiche',
-                'tip.state.subscribed':    'Notifiche attive',
-                'tip.state.blocked':       'Notifiche bloccate',
-                'message.prenotify':       'Clicca per ricevere notifiche',
-                'message.action.subscribed':   'Notifiche attivate!',
-                'message.action.resubscribed': 'Notifiche riattivate!',
-                'message.action.unsubscribed': 'Notifiche disattivate.',
-                'dialog.main.title':       'Notifiche',
-                'dialog.main.button.subscribe':   'ATTIVA',
-                'dialog.main.button.unsubscribe': 'DISATTIVA',
-                'dialog.blocked.title':    'Sblocca le notifiche',
-                'dialog.blocked.message':  'Segui queste istruzioni per abilitare le notifiche:',
-            },
-        },
-    });
-});
-</script>
 </body>
 </html>
