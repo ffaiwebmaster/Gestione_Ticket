@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestionale Lavorazioni - Single-file PHP task manager</title>
-  <meta name="description" content="Self-hosted task and job manager. Single PHP file, SQLite database, setup wizard. Works for any team - accountants, lawyers, salons, workshops. No Docker needed." />
+  <title>Gestionale Lavorazioni — Single-file PHP task manager</title>
+  <meta name="description" content="Self-hosted task and job manager. Single PHP file, SQLite database, setup wizard. Works for any team — accountants, lawyers, salons, workshops. No Docker needed." />
   <meta property="og:title" content="Gestionale Lavorazioni" />
   <meta property="og:description" content="Single-file PHP+SQLite task manager. Drop it anywhere and go." />
   <meta property="og:type" content="website" />
@@ -43,7 +43,7 @@
     a { color: var(--amber); text-decoration: none; }
     a:hover { color: var(--amber-l); }
 
-    /* - NAV - */
+    /* ── NAV ── */
     nav {
       position: sticky;
       top: 0;
@@ -96,7 +96,7 @@
 
     .nav-gh:hover { border-color: var(--amber); color: var(--amber); }
 
-    /* - HERO - */
+    /* ── HERO ── */
     .hero {
       padding: 7rem 2rem 5rem;
       max-width: 900px;
@@ -115,13 +115,7 @@
       gap: 0.6rem;
     }
 
-    .hero-tag::before {
-      content: '';
-      display: inline-block;
-      width: 24px;
-      height: 1px;
-      background: var(--amber);
-    }
+
 
     h1 {
       font-family: var(--font-head);
@@ -180,7 +174,7 @@
 
     .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
 
-    /* - STATS BAR - */
+    /* ── STATS BAR ── */
     .stats {
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
@@ -217,7 +211,7 @@
       color: var(--muted);
     }
 
-    /* - SECTIONS - */
+    /* ── SECTIONS ── */
     section {
       max-width: 960px;
       margin: 0 auto;
@@ -248,7 +242,7 @@
       margin-bottom: 3rem;
     }
 
-    /* - FEATURE GRID - */
+    /* ── FEATURE GRID ── */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -289,7 +283,7 @@
       line-height: 1.6;
     }
 
-    /* - SECTORS - */
+    /* ── SECTORS ── */
     .sectors-grid {
       display: flex;
       flex-wrap: wrap;
@@ -309,7 +303,7 @@
 
     .sector-tag:hover { border-color: var(--amber); color: var(--amber); }
 
-    /* - DEPLOY BLOCK - */
+    /* ── DEPLOY BLOCK ── */
     .deploy-box {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -356,7 +350,7 @@
     pre .comment { color: var(--muted); }
     pre .cmd { color: var(--amber); }
 
-    /* - HOW IT WORKS - */
+    /* ── HOW IT WORKS ── */
     .steps {
       counter-reset: step;
       display: flex;
@@ -406,7 +400,7 @@
       color: var(--muted);
     }
 
-    /* - GALLERY - */
+    /* ── GALLERY ── */
     .gallery-section {
       background: var(--bg2);
       border-top: 1px solid var(--border);
@@ -498,7 +492,7 @@
     .gallery-screen { display: none; }
     .gallery-screen.active { display: block; }
 
-    /* - APP UI mockup shared - */
+    /* ── APP UI mockup shared ── */
     .app-shell {
       display: flex;
       height: 460px;
@@ -823,7 +817,7 @@
       letter-spacing: 0.04em;
     }
 
-    /* - CTA - */
+    /* ── CTA ── */
     .cta-section {
       background: var(--bg2);
       border-top: 1px solid var(--border);
@@ -845,7 +839,7 @@
     .cta-inner p { color: var(--muted); max-width: 440px; }
     .cta-actions { display: flex; gap: 1rem; flex-wrap: wrap; flex-shrink: 0; }
 
-    /* - FOOTER - */
+    /* ── FOOTER ── */
     footer {
       max-width: 960px;
       margin: 0 auto;
@@ -887,7 +881,7 @@
       letter-spacing: 0.05em;
     }
 
-    /* - RESPONSIVE - */
+    /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       nav ul { display: none; }
       .stat { padding: 1.25rem 1.5rem; }
@@ -906,7 +900,7 @@
     <li><a href="#sectors">Sectors</a></li>
     <li><a href="#deploy">Deploy</a></li>
   </ul>
-  <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" class="nav-gh" target="_blank" rel="noopener">GitHub →</a>
+  <a href="https://github.com/ffaiwebmaster/Gestione_Ticket" class="nav-gh" target="_blank" rel="noopener">GitHub →</a>
 </nav>
 
 <!-- HERO -->
@@ -917,8 +911,8 @@
     A single PHP file with a built-in setup wizard. Drop it on any shared hosting or run it locally on Windows. No Docker, no config files, no database server.
   </p>
   <div class="hero-actions">
-    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/releases" class="btn-primary">Download ZIP</a>
-    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" class="btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+    <a href="https://github.com/ffaiwebmaster/Gestione_Ticket/archive/refs/heads/main.zip" class="btn-primary">Download ZIP</a>
+    <a href="https://github.com/ffaiwebmaster/Gestione_Ticket" class="btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
   </div>
 </header>
 
@@ -953,7 +947,7 @@
     <div class="feature-card">
       <span class="feature-icon">▣</span>
       <h3>Single-file architecture</h3>
-      <p>The entire application - UI, logic, and database layer - lives in one PHP file. Upload it, open it, done.</p>
+      <p>The entire application — UI, logic, and database layer — lives in one PHP file. Upload it, open it, done.</p>
     </div>
     <div class="feature-card">
       <span class="feature-icon">◈</span>
@@ -1078,12 +1072,12 @@
           </div>
           <div class="app-main">
             <div class="app-topbar">
-              <div class="app-title">Job #0042 - Server migration</div>
+              <div class="app-title">Job #0042 — Server migration</div>
               <div class="app-btn">Edit</div>
             </div>
             <div class="detail-grid">
               <div class="detail-main">
-                <div class="detail-title">Server migration - Tecnofast</div>
+                <div class="detail-title">Server migration — Tecnofast</div>
                 <div class="detail-desc">Full migration from on-premise server to VPS. Includes data transfer, DNS update, SSL renewal and 48h monitoring after go-live.</div>
                 <div class="detail-divider"></div>
                 <div class="detail-label">Notes</div>
@@ -1127,7 +1121,7 @@
                 <div class="wstep"></div>
               </div>
               <div class="wizard-heading">Choose your sector</div>
-              <div class="wizard-sub">Step 2 of 5 - Select the profile that best fits your team. Terminology and categories will adapt automatically.</div>
+              <div class="wizard-sub">Step 2 of 5 — Select the profile that best fits your team. Terminology and categories will adapt automatically.</div>
               <div class="wiz-sectors">
                 <div class="wiz-sector">IT &amp; Tech support</div>
                 <div class="wiz-sector sel">Accounting firm</div>
@@ -1145,7 +1139,7 @@
       </div>
     </div>
 
-    <p class="gallery-caption" id="gallery-caption">Dashboard - kanban view with status and priority badges</p>
+    <p class="gallery-caption" id="gallery-caption">Dashboard — kanban view with status and priority badges</p>
   </div>
 </div>
 
@@ -1183,7 +1177,7 @@
 
     <div class="deploy-content active" id="tab-windows">
       <pre><span class="comment"># 1. Download the ZIP and extract it</span>
-<span class="comment"># 2. Double-click AVVIA.bat - PHP built-in server starts</span>
+<span class="comment"># 2. Double-click AVVIA.bat — PHP built-in server starts</span>
 <span class="comment"># 3. Browser opens automatically at:</span>
 <span class="cmd">http://localhost:8080/gestionale_lavorazioni.php</span>
 <span class="comment"># 4. Follow the 5-step setup wizard</span></pre>
@@ -1232,7 +1226,7 @@
       <div class="step-num">03</div>
       <div class="step-body">
         <h4>Logo upload</h4>
-        <p>Upload your logo. It's stored as base64 in the SQLite database - no extra files to manage.</p>
+        <p>Upload your logo. It's stored as base64 in the SQLite database — no extra files to manage.</p>
       </div>
     </div>
     <div class="step">
@@ -1257,31 +1251,31 @@
   <div class="cta-inner">
     <div>
       <h2>Self-host it today.</h2>
-      <p>Free, open source, MIT licensed. Works where you work - no cloud subscription required.</p>
+      <p>Free, open source, MIT licensed. Works where you work — no cloud subscription required.</p>
     </div>
     <div class="cta-actions">
-      <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/releases" class="btn-primary">Download ZIP</a>
-      <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" class="btn-secondary" target="_blank" rel="noopener">Star on GitHub</a>
+      <a href="https://github.com/ffaiwebmaster/Gestione_Ticket/archive/refs/heads/main.zip" class="btn-primary">Download ZIP</a>
+      <a href="https://github.com/ffaiwebmaster/Gestione_Ticket" class="btn-secondary" target="_blank" rel="noopener">Star on GitHub</a>
     </div>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">gestionale<span>.</span>lavorazioni</div>
+  <div class="footer-logo">gestionale<span>.</span>ticket</div>
   <div class="footer-links">
-    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" target="_blank" rel="noopener">GitHub</a>
-    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/blob/main/README.md" target="_blank" rel="noopener">Docs</a>
-    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/issues" target="_blank" rel="noopener">Issues</a>
+    <a href="https://github.com/ffaiwebmaster/Gestione_Ticket" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/ffaiwebmaster/Gestione_Ticket/blob/main/README.md" target="_blank" rel="noopener">Docs</a>
+    <a href="https://github.com/ffaiwebmaster/Gestione_Ticket/issues" target="_blank" rel="noopener">Issues</a>
   </div>
   <div class="footer-mit">MIT License · ffaiwebmaster</div>
 </footer>
 
 <script>
   const galleryMeta = {
-    dash:   { url: 'localhost:8080/gestionale_lavorazioni.php', caption: 'Dashboard - kanban view with status and priority badges' },
-    detail: { url: 'localhost:8080/gestionale_lavorazioni.php?job=42', caption: 'Job detail - full context, metadata, and notes in one view' },
-    wizard: { url: 'localhost:8080/gestionale_lavorazioni.php?setup=2', caption: 'Setup wizard step 2 - sector selection with automatic terminology adaptation' }
+    dash:   { url: 'localhost:8080/gestionale_lavorazioni.php', caption: 'Dashboard — kanban view with status and priority badges' },
+    detail: { url: 'localhost:8080/gestionale_lavorazioni.php?job=42', caption: 'Job detail — full context, metadata, and notes in one view' },
+    wizard: { url: 'localhost:8080/gestionale_lavorazioni.php?setup=2', caption: 'Setup wizard step 2 — sector selection with automatic terminology adaptation' }
   };
 
   function switchGallery(el, id) {
