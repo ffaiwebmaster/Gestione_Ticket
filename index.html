@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestionale Lavorazioni - Single-file PHP task manager</title>
+  <meta name="description" content="Self-hosted task and job manager. Single PHP file, SQLite database, setup wizard. Works for any team - accountants, lawyers, salons, workshops. No Docker needed." />
+  <meta property="og:title" content="Gestionale Lavorazioni" />
+  <meta property="og:description" content="Single-file PHP+SQLite task manager. Drop it anywhere and go." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0e0d0b;
+      --bg2:      #161512;
+      --bg3:      #1e1c18;
+      --border:   #2e2b24;
+      --amber:    #e09a1a;
+      --amber-d:  #b07510;
+      --amber-l:  #f5c84a;
+      --text:     #f0ece2;
+      --muted:    #8a8270;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--amber); text-decoration: none; }
+    a:hover { color: var(--amber-l); }
+
+    /* - NAV - */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(14,13,11,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .nav-logo span { color: var(--amber); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav ul a {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    nav ul a:hover { color: var(--amber); }
+
+    .nav-gh {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .nav-gh:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* - HERO - */
+    .hero {
+      padding: 7rem 2rem 5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .hero-tag::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--amber);
+    }
+
+    h1 {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      background: var(--amber);
+      color: #0e0d0b;
+      padding: 0.75rem 1.75rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--amber-l); color: #0e0d0b; }
+
+    .btn-secondary {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.75rem;
+      border-radius: 4px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+
+    /* - STATS BAR - */
+    .stats {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    .stat {
+      padding: 1.5rem 3rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat-val {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: var(--amber);
+      display: block;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    /* - SECTIONS - */
+    section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      color: var(--text);
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section-intro {
+      color: var(--muted);
+      max-width: 520px;
+      margin-bottom: 3rem;
+    }
+
+    /* - FEATURE GRID - */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      padding: 2rem;
+      transition: background 0.2s;
+    }
+
+    .feature-card:hover { background: var(--bg3); }
+
+    .feature-icon {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      color: var(--amber);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* - SECTORS - */
+    .sectors-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 2rem;
+    }
+
+    .sector-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.45rem 1rem;
+      border-radius: 4px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .sector-tag:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* - DEPLOY BLOCK - */
+    .deploy-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+
+    .deploy-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .deploy-tab {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.25rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s;
+    }
+
+    .deploy-tab.active {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+      background: var(--bg3);
+    }
+
+    .deploy-content { display: none; padding: 1.75rem 2rem; }
+    .deploy-content.active { display: block; }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #c8bfa0;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    pre .comment { color: var(--muted); }
+    pre .cmd { color: var(--amber); }
+
+    /* - HOW IT WORKS - */
+    .steps {
+      counter-reset: step;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      padding: 1.75rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      counter-increment: step;
+      transition: background 0.2s;
+    }
+
+    .step:last-child { border-bottom: none; }
+    .step:hover { background: var(--bg3); }
+
+    .step-num {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--border);
+      min-width: 2rem;
+      line-height: 1;
+    }
+
+    .step:hover .step-num { color: var(--amber-d); }
+
+    .step-body h4 {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .step-body p {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    /* - GALLERY - */
+    .gallery-section {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 0;
+    }
+
+    .gallery-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .gallery-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .gallery-tab {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: 0.5rem 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .gallery-tab.active {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #0e0d0b;
+    }
+
+    .gallery-tab:not(.active):hover {
+      border-color: var(--muted);
+      color: var(--text);
+    }
+
+    .gallery-frame {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #1a1814;
+    }
+
+    /* browser chrome */
+    .browser-chrome {
+      background: #111009;
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .browser-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-r { background: #3a2020; }
+    .dot-y { background: #3a3020; }
+    .dot-g { background: #1e3020; }
+
+    .browser-url {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      flex: 1;
+      max-width: 340px;
+    }
+
+    .gallery-screen { display: none; }
+    .gallery-screen.active { display: block; }
+
+    /* - APP UI mockup shared - */
+    .app-shell {
+      display: flex;
+      height: 460px;
+      overflow: hidden;
+    }
+
+    .app-sidebar {
+      width: 200px;
+      background: #111009;
+      border-right: 1px solid var(--border);
+      padding: 1rem 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--amber);
+      padding: 0 1rem 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-item {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.5rem 1rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: default;
+    }
+
+    .sidebar-item.active {
+      color: var(--amber);
+      background: rgba(224,154,26,0.06);
+      border-left: 2px solid var(--amber);
+    }
+
+    .sidebar-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .app-main {
+      flex: 1;
+      padding: 1.25rem;
+      overflow: hidden;
+      background: #1a1814;
+    }
+
+    .app-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .app-title {
+      font-family: var(--font-head);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .app-btn {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      background: var(--amber);
+      color: #0e0d0b;
+      padding: 0.3rem 0.75rem;
+      border-radius: 3px;
+    }
+
+    /* dashboard cards */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      height: calc(100% - 2.5rem);
+    }
+
+    .kanban-col-head {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .kanban-count {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 0.4rem;
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    .task-card {
+      background: #111009;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .task-title {
+      font-size: 0.72rem;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .task-meta {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-open   { background: rgba(224,154,26,0.15); color: #e09a1a; }
+    .badge-wip    { background: rgba(59,125,255,0.15); color: #7aabff; }
+    .badge-done   { background: rgba(40,180,100,0.15); color: #5dd98a; }
+    .badge-urgent { background: rgba(220,60,60,0.15);  color: #f07070; }
+
+    /* detail view */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 1rem;
+      height: calc(100% - 2.5rem);
+    }
+
+    .detail-main {
+      background: #111009;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow: hidden;
+    }
+
+    .detail-title {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .detail-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.75rem 0;
+    }
+
+    .detail-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .detail-val {
+      font-size: 0.78rem;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .detail-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .meta-box {
+      background: #111009;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+
+    .meta-box-title {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .meta-row span:last-child { color: var(--text); }
+
+    /* wizard view */
+    .wizard-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: calc(100% - 0rem);
+      background: #1a1814;
+      padding: 1.25rem;
+    }
+
+    .wizard-box {
+      background: #111009;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .wizard-steps {
+      display: flex;
+      gap: 0.3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .wstep {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+    }
+
+    .wstep.done { background: var(--amber); }
+    .wstep.current { background: var(--amber-d); }
+
+    .wizard-heading {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .wizard-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .wiz-sectors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .wiz-sector {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.55rem 0.65rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      cursor: default;
+      transition: all 0.15s;
+    }
+
+    .wiz-sector.sel {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: rgba(224,154,26,0.06);
+    }
+
+    .wiz-btn {
+      width: 100%;
+      background: var(--amber);
+      color: #0e0d0b;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.6rem;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    /* gallery caption */
+    .gallery-caption {
+      margin-top: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* - CTA - */
+    .cta-section {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cta-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-inner h2 { margin-bottom: 0.5rem; }
+    .cta-inner p { color: var(--muted); max-width: 440px; }
+    .cta-actions { display: flex; gap: 1rem; flex-wrap: wrap; flex-shrink: 0; }
+
+    /* - FOOTER - */
+    footer {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .footer-logo span { color: var(--amber); }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-links a:hover { color: var(--amber); }
+
+    .footer-mit {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--border);
+      letter-spacing: 0.05em;
+    }
+
+    /* - RESPONSIVE - */
+    @media (max-width: 600px) {
+      nav ul { display: none; }
+      .stat { padding: 1.25rem 1.5rem; }
+      .cta-inner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">gestionale<span>.</span>lavorazioni</div>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#sectors">Sectors</a></li>
+    <li><a href="#deploy">Deploy</a></li>
+  </ul>
+  <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" class="nav-gh" target="_blank" rel="noopener">GitHub →</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <p class="hero-tag">Open source · PHP + SQLite · MIT License</p>
+  <h1>Task management<br />that <em>just works.</em></h1>
+  <p class="hero-sub">
+    A single PHP file with a built-in setup wizard. Drop it on any shared hosting or run it locally on Windows. No Docker, no config files, no database server.
+  </p>
+  <div class="hero-actions">
+    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/releases" class="btn-primary">Download ZIP</a>
+    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" class="btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <span class="stat-val">1</span>
+    <span class="stat-label">PHP file</span>
+  </div>
+  <div class="stat">
+    <span class="stat-val">0</span>
+    <span class="stat-label">Dependencies</span>
+  </div>
+  <div class="stat">
+    <span class="stat-val">5</span>
+    <span class="stat-label">Setup steps</span>
+  </div>
+  <div class="stat">
+    <span class="stat-val">MIT</span>
+    <span class="stat-label">License</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <p class="section-tag">What makes it different</p>
+  <h2>Built for real teams,<br />not for DevOps engineers.</h2>
+  <p class="section-intro">
+    Most self-hosted tools assume you have a server, a terminal, and half a weekend. Gestionale Lavorazioni assumes you have a job to do.
+  </p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">▣</span>
+      <h3>Single-file architecture</h3>
+      <p>The entire application - UI, logic, and database layer - lives in one PHP file. Upload it, open it, done.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">◈</span>
+      <h3>SQLite database</h3>
+      <p>No MySQL, no PostgreSQL. The database is a single file next to your PHP. Backup is just copy-paste.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">◎</span>
+      <h3>5-step setup wizard</h3>
+      <p>First launch opens a guided wizard. Set your organization name, sector, logo, and you're running in under two minutes.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⬡</span>
+      <h3>Works anywhere PHP runs</h3>
+      <p>Shared hosting, VPS, local Windows with a .bat launcher, Cloudflare Tunnel. If PHP 8 runs there, this runs there.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">◐</span>
+      <h3>Dynamic branding</h3>
+      <p>Upload your logo, set your app name. The interface reflects your organization, not the software vendor.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⊕</span>
+      <h3>Italian / English UI</h3>
+      <p>Full i18n support built in. Switch between Italian and English from the settings panel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<div class="gallery-section" id="gallery">
+  <div class="gallery-inner">
+    <p class="section-tag">Interface preview</p>
+    <h2 style="margin-bottom:0.5rem;">See it before you run it.</h2>
+    <p class="section-intro" style="margin-bottom:2rem;">Three views from the actual interface. Same dark tone, same clarity, on every device.</p>
+
+    <div class="gallery-tabs">
+      <div class="gallery-tab active" onclick="switchGallery(this,'dash')">Dashboard</div>
+      <div class="gallery-tab" onclick="switchGallery(this,'detail')">Job detail</div>
+      <div class="gallery-tab" onclick="switchGallery(this,'wizard')">Setup wizard</div>
+    </div>
+
+    <div class="gallery-frame">
+      <div class="browser-chrome">
+        <div class="browser-dots">
+          <div class="browser-dot dot-r"></div>
+          <div class="browser-dot dot-y"></div>
+          <div class="browser-dot dot-g"></div>
+        </div>
+        <div class="browser-url" id="gallery-url">localhost:8080/gestionale_lavorazioni.php</div>
+      </div>
+
+      <!-- SCREEN 1: Dashboard kanban -->
+      <div class="gallery-screen active" id="gscreen-dash">
+        <div class="app-shell">
+          <div class="app-sidebar">
+            <div class="sidebar-logo">GL ◆</div>
+            <div class="sidebar-item active"><div class="sidebar-dot"></div>Dashboard</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Jobs</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Clients</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Reports</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Settings</div>
+          </div>
+          <div class="app-main">
+            <div class="app-topbar">
+              <div class="app-title">Active jobs</div>
+              <div class="app-btn">+ New job</div>
+            </div>
+            <div class="kanban">
+              <div>
+                <div class="kanban-col-head">Open <span class="kanban-count">4</span></div>
+                <div class="task-card">
+                  <div class="task-title">Website revision</div>
+                  <div class="task-meta"><span class="badge badge-open">open</span><span>Rossi Studio</span></div>
+                </div>
+                <div class="task-card">
+                  <div class="task-title">Annual accounting report</div>
+                  <div class="task-meta"><span class="badge badge-urgent">urgent</span><span>Bianchi SRL</span></div>
+                </div>
+                <div class="task-card">
+                  <div class="task-title">Contract renewal</div>
+                  <div class="task-meta"><span class="badge badge-open">open</span><span>Verdi &amp; Assoc.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="kanban-col-head">In progress <span class="kanban-count">3</span></div>
+                <div class="task-card">
+                  <div class="task-title">Server migration</div>
+                  <div class="task-meta"><span class="badge badge-wip">wip</span><span>Tecnofast</span></div>
+                </div>
+                <div class="task-card">
+                  <div class="task-title">Logo redesign</div>
+                  <div class="task-meta"><span class="badge badge-wip">wip</span><span>Caffè Moderno</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="kanban-col-head">Done <span class="kanban-count">7</span></div>
+                <div class="task-card">
+                  <div class="task-title">Tax filing Q1</div>
+                  <div class="task-meta"><span class="badge badge-done">done</span><span>Mori Partners</span></div>
+                </div>
+                <div class="task-card">
+                  <div class="task-title">Hardware install</div>
+                  <div class="task-meta"><span class="badge badge-done">done</span><span>Logistica Nord</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: Job detail -->
+      <div class="gallery-screen" id="gscreen-detail">
+        <div class="app-shell">
+          <div class="app-sidebar">
+            <div class="sidebar-logo">GL ◆</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Dashboard</div>
+            <div class="sidebar-item active"><div class="sidebar-dot"></div>Jobs</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Clients</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Reports</div>
+            <div class="sidebar-item"><div class="sidebar-dot"></div>Settings</div>
+          </div>
+          <div class="app-main">
+            <div class="app-topbar">
+              <div class="app-title">Job #0042 - Server migration</div>
+              <div class="app-btn">Edit</div>
+            </div>
+            <div class="detail-grid">
+              <div class="detail-main">
+                <div class="detail-title">Server migration - Tecnofast</div>
+                <div class="detail-desc">Full migration from on-premise server to VPS. Includes data transfer, DNS update, SSL renewal and 48h monitoring after go-live.</div>
+                <div class="detail-divider"></div>
+                <div class="detail-label">Notes</div>
+                <div class="detail-val">Client confirmed maintenance window: Saturday 02:00–06:00. Backup done.</div>
+                <div class="detail-divider"></div>
+                <div class="detail-label">Status</div>
+                <div><span class="badge badge-wip" style="font-size:0.7rem;padding:0.25rem 0.6rem;">In progress</span></div>
+              </div>
+              <div class="detail-sidebar">
+                <div class="meta-box">
+                  <div class="meta-box-title">Details</div>
+                  <div class="meta-row"><span>Client</span><span>Tecnofast SRL</span></div>
+                  <div class="meta-row"><span>Assigned</span><span>Marco R.</span></div>
+                  <div class="meta-row"><span>Created</span><span>04 Apr 2026</span></div>
+                  <div class="meta-row"><span>Deadline</span><span>12 Apr 2026</span></div>
+                </div>
+                <div class="meta-box">
+                  <div class="meta-box-title">Priority</div>
+                  <div><span class="badge badge-urgent" style="font-size:0.7rem;padding:0.25rem 0.6rem;">Urgent</span></div>
+                </div>
+                <div class="meta-box">
+                  <div class="meta-box-title">Sector</div>
+                  <div style="font-size:0.75rem;color:var(--text);">IT &amp; Tech support</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: Setup wizard -->
+      <div class="gallery-screen" id="gscreen-wizard">
+        <div class="app-shell" style="background:#1a1814;">
+          <div class="wizard-wrap">
+            <div class="wizard-box">
+              <div class="wizard-steps">
+                <div class="wstep done"></div>
+                <div class="wstep current"></div>
+                <div class="wstep"></div>
+                <div class="wstep"></div>
+                <div class="wstep"></div>
+              </div>
+              <div class="wizard-heading">Choose your sector</div>
+              <div class="wizard-sub">Step 2 of 5 - Select the profile that best fits your team. Terminology and categories will adapt automatically.</div>
+              <div class="wiz-sectors">
+                <div class="wiz-sector">IT &amp; Tech support</div>
+                <div class="wiz-sector sel">Accounting firm</div>
+                <div class="wiz-sector">Law office</div>
+                <div class="wiz-sector">Medical office</div>
+                <div class="wiz-sector">Barbershop / salon</div>
+                <div class="wiz-sector">Creative agency</div>
+                <div class="wiz-sector">Repair workshop</div>
+                <div class="wiz-sector">Custom…</div>
+              </div>
+              <div class="wiz-btn">Continue →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="gallery-caption" id="gallery-caption">Dashboard - kanban view with status and priority badges</p>
+  </div>
+</div>
+
+<!-- SECTORS -->
+<section id="sectors" style="padding-top: 0;">
+  <p class="section-tag">Who uses it</p>
+  <h2>Any team that tracks jobs.</h2>
+  <p class="section-intro">
+    The setup wizard includes preconfigured profiles for common sectors. Choose yours and the terminology, categories, and defaults adapt automatically.
+  </p>
+  <div class="sectors-grid">
+    <span class="sector-tag">IT & Tech support</span>
+    <span class="sector-tag">Accounting firms</span>
+    <span class="sector-tag">Law offices</span>
+    <span class="sector-tag">Medical offices</span>
+    <span class="sector-tag">Barbershops & salons</span>
+    <span class="sector-tag">Creative agencies</span>
+    <span class="sector-tag">Repair workshops</span>
+    <span class="sector-tag">Custom sector</span>
+  </div>
+</section>
+
+<!-- DEPLOY -->
+<section id="deploy">
+  <p class="section-tag">Get started</p>
+  <h2>Running in 60 seconds.</h2>
+  <p class="section-intro">Choose your environment. The steps are the same everywhere: copy the file, open the URL, follow the wizard.</p>
+
+  <div class="deploy-box">
+    <div class="deploy-tabs">
+      <div class="deploy-tab active" onclick="switchTab(this, 'windows')">Windows</div>
+      <div class="deploy-tab" onclick="switchTab(this, 'hosting')">Shared Hosting</div>
+      <div class="deploy-tab" onclick="switchTab(this, 'vps')">VPS / Linux</div>
+    </div>
+
+    <div class="deploy-content active" id="tab-windows">
+      <pre><span class="comment"># 1. Download the ZIP and extract it</span>
+<span class="comment"># 2. Double-click AVVIA.bat - PHP built-in server starts</span>
+<span class="comment"># 3. Browser opens automatically at:</span>
+<span class="cmd">http://localhost:8080/gestionale_lavorazioni.php</span>
+<span class="comment"># 4. Follow the 5-step setup wizard</span></pre>
+    </div>
+
+    <div class="deploy-content" id="tab-hosting">
+      <pre><span class="comment"># 1. Upload gestionale_lavorazioni.php via FTP to public_html/</span>
+<span class="comment"># 2. Make sure the folder is writable (chmod 755)</span>
+<span class="comment"># 3. Open the URL in your browser:</span>
+<span class="cmd">https://yourdomain.com/gestionale_lavorazioni.php</span>
+<span class="comment"># 4. Follow the 5-step setup wizard</span></pre>
+    </div>
+
+    <div class="deploy-content" id="tab-vps">
+      <pre><span class="comment"># Apache: point DocumentRoot to the folder containing the file</span>
+<span class="comment"># nginx: see the sample config in the repo README</span>
+<span class="cmd">cp gestionale_lavorazioni.php /var/www/html/</span>
+<span class="cmd">chown www-data:www-data /var/www/html/gestionale_lavorazioni.php</span>
+<span class="comment"># Open https://yourdomain.com/gestionale_lavorazioni.php</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="padding-top: 0;">
+  <p class="section-tag">First launch</p>
+  <h2>The setup wizard.</h2>
+  <p class="section-intro">No manual configuration. The wizard collects everything it needs on first run and never asks again.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h4>Organization name</h4>
+        <p>Your company or team name. Appears in the header and all documents.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h4>Sector selection</h4>
+        <p>Choose from 7 preconfigured profiles or define a custom sector. Terminology and categories adapt automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h4>Logo upload</h4>
+        <p>Upload your logo. It's stored as base64 in the SQLite database - no extra files to manage.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <h4>Admin credentials</h4>
+        <p>Set your username and password. Access control is built in from day one.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-body">
+        <h4>Ready</h4>
+        <p>The wizard completes and redirects to your fully configured instance. No restart required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div>
+      <h2>Self-host it today.</h2>
+      <p>Free, open source, MIT licensed. Works where you work - no cloud subscription required.</p>
+    </div>
+    <div class="cta-actions">
+      <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/releases" class="btn-primary">Download ZIP</a>
+      <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" class="btn-secondary" target="_blank" rel="noopener">Star on GitHub</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">gestionale<span>.</span>lavorazioni</div>
+  <div class="footer-links">
+    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/blob/main/README.md" target="_blank" rel="noopener">Docs</a>
+    <a href="https://github.com/ffaiwebmaster/gestionale-lavorazioni/issues" target="_blank" rel="noopener">Issues</a>
+  </div>
+  <div class="footer-mit">MIT License · ffaiwebmaster</div>
+</footer>
+
+<script>
+  const galleryMeta = {
+    dash:   { url: 'localhost:8080/gestionale_lavorazioni.php', caption: 'Dashboard - kanban view with status and priority badges' },
+    detail: { url: 'localhost:8080/gestionale_lavorazioni.php?job=42', caption: 'Job detail - full context, metadata, and notes in one view' },
+    wizard: { url: 'localhost:8080/gestionale_lavorazioni.php?setup=2', caption: 'Setup wizard step 2 - sector selection with automatic terminology adaptation' }
+  };
+
+  function switchGallery(el, id) {
+    document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.gallery-screen').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('gscreen-' + id).classList.add('active');
+    document.getElementById('gallery-url').textContent = galleryMeta[id].url;
+    document.getElementById('gallery-caption').textContent = galleryMeta[id].caption;
+  }
+
+  function switchTab(el, id) {
+    document.querySelectorAll('.deploy-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.deploy-content').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+</script>
+</body>
+</html>
